@@ -28,6 +28,7 @@ import http.client
 import io
 import itertools
 import os
+import platform
 import requests
 import responses
 import socket
@@ -494,6 +495,10 @@ class Urllib3Mock:
         sock = FakeSocket(stream.encode('utf8'))
         http_response = http.client.HTTPResponse(sock)
         http_response.begin()
+
+        if platform.python_version_tuple() < ("3", "7", "0"):
+            return http_response
+
         response = urllib3.response.HTTPResponse(
             body=http_response,
             headers=headers,
