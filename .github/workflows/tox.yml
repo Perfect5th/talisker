@@ -5,6 +5,7 @@ on:
         branches:
             - main
             - master
+            - 3.8-3.10-fix
     pull_request:
         branches:
             - main
