@@ -5,6 +5,7 @@ on:
         branches:
             - main
             - master
+            - test-urllib3-version
     pull_request:
         branches:
             - main

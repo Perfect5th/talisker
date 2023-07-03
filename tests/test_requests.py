@@ -45,6 +45,12 @@ import talisker.requests
 import talisker.statsd
 import talisker.testing
 
+try:
+    from urllib3.response import BaseHTTPResponse
+    URLLIB3_COMPATIBLE_VERSION = True
+except ImportError:
+    URLLIB3_COMPATIBLE_VERSION = False
+
 
 def request(method='GET', host='http://example.com', url='/', **kwargs):
     req = requests.Request(method, url=host + url, **kwargs)
@@ -482,7 +488,12 @@ class Urllib3Mock:
         self.response_iter = iter(responses)
 
     def make_response(self, content, status='200 OK', headers={}):
-        """Make a fake http.client.HTTPResponse based on a byte stream."""
+        """Make a fake HTTPResponse based on a byte stream.
+
+        For versions of urllib3 prior to version 2, an http.client.HTTPResponse
+        is API-compatible. For versions after, we return a
+        urllib3.response.HTTPResponse.
+        """
         if not headers:
             headers["Content-Type"] = "text/html"
 
@@ -496,8 +507,7 @@ class Urllib3Mock:
         http_response = http.client.HTTPResponse(sock)
         http_response.begin()
 
-        # Python versions below 3.7 expect a non-urllib3 response.
-        if sys.version_info.minor < 7:
+        if not URLLIB3_COMPATIBLE_VERSION:
             return http_response
 
         response = urllib3.response.HTTPResponse(
