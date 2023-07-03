@@ -31,7 +31,6 @@ import os
 import requests
 import responses
 import socket
-import sys
 import threading
 import time
 from urllib.parse import urlunsplit
@@ -46,9 +45,11 @@ import talisker.statsd
 import talisker.testing
 
 try:
-    from urllib3.response import BaseHTTPResponse
-    URLLIB3_COMPATIBLE_VERSION = True
-except ImportError:
+    URLLIB3_COMPATIBLE_VERSION = issubclass(
+        urllib3.response.HTTPResponse,
+        urllib3.response.BaseHTTPResponse
+    )
+except AttributeError:
     URLLIB3_COMPATIBLE_VERSION = False
 
 
@@ -491,7 +492,7 @@ class Urllib3Mock:
         """Make a fake HTTPResponse based on a byte stream.
 
         For versions of urllib3 prior to version 2, an http.client.HTTPResponse
-        is API-compatible. For versions after, we return a
+        is returned. For versions after, we return a
         urllib3.response.HTTPResponse.
         """
         if not headers:
